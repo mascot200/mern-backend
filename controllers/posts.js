@@ -14,7 +14,7 @@ import mongoose from 'mongoose'
 
  export const createPost = async(req, res) => {
     const post = req.body
-    const newPost = new PostMessage({...post, creator: req.userId?.name, createdAt: new Date().toISOString()})
+    const newPost = new PostMessage({...post, creator: req.userId, createdAt: new Date().toISOString()})
    try {
        await newPost.save()
        res.status(200).json(newPost)
@@ -39,10 +39,13 @@ import mongoose from 'mongoose'
  }
 
  export const deletePost = async(req, res) => {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
-    await PostMessage.findByIdAndRemove(id);
-    res.json({message: 'Post deleted successfully'})
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+
+  await PostMessage.findByIdAndRemove(id);
+
+  res.json({ message: "Post deleted successfully." });
  }
 
  export const likePost = async (req, res) => {
@@ -65,5 +68,17 @@ import mongoose from 'mongoose'
     }
     const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true });
     res.status(200).json(updatedPost);
+}
+
+export const getPostBySearch = async(req, res) => {
+  const { searchQuery } = req.query;
+  try {
+    const query = new RegExp(searchQuery, 'i')
+    // find post by title or tags
+     const posts = await PostMessage.find({ title: query})
+     res.json({data: posts})
+  } catch (error) {
+   res.status(404).json({ message: error.message });
+  }
 }
 
