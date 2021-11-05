@@ -98,3 +98,21 @@ export const getPostBySearch = async(req, res) => {
   }
 }
 
+
+export const commentPost = async (req, res) => {
+  const { id } = req.params;
+  const { finalComment } = req.body;
+
+  if (!req.userId) {
+      return res.json({ message: "Unauthenticated" });
+    }
+
+  const post = await PostMessage.findById(id);
+  post.comments.push(finalComment);
+  const updatedPost = await PostMessage.findById(id, post, { new: true });
+  
+  res.status(200).json(updatedPost);
+  console.log(updatedPost);
+}
+
+
